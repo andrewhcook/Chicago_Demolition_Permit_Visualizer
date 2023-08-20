@@ -1,0 +1,68 @@
+<%require "net/http"
+pp params
+@google_key = ENV.fetch("G_MAPS_API_KEY")
+@distance = params["distance"].to_f
+@anchor_address = params["anchor_address"]
+@results_from = params["records_from"].to_i
+@results_to = params["records_to"].to_i
+uri = URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
+response = Net::HTTP.get(uri)
+results = JSON.parse(response)
+@geo_distance_uri = "https://maps.googleapis.com/maps/api/distancematrix/json"
+
+@entries = [] 
+for i in @results_from..@results_to
+@entries.push(results[i])
+end
+
+@item_array = []
+@entries.each {|item| 
+
+        number = item["street_number"]
+        direction = item["street_direction"]
+        name = item["street_name"]
+        address_string = "#{number} #{direction} #{name}, Chicago, IL"
+
+
+        parameters = {
+  :destinations => CGI.escape(address_string),
+  :origins => CGI.escape(@anchor_address),
+  :mode => CGI.escape("driving")
+}
+uri = URI("#{@geo_distance_uri}?#{parameters.map { |k,v| "#{k}=#{v}" }.join('&')}&key=#{@google_key}")
+response = Net::HTTP.get(uri)
+result = JSON.parse(response)
+result['rows'].each do |row|
+  row['elements'].select{ |element|
+    distance_value = element['distance']['value'].to_f
+    if distance_value < @distance
+    @item_array.push(item)
+    end
+    
+}end
+}
+
+
+%>
+
+
+<h2> View Chicago Demolition Permit Records </h2>
+<div class = "permit-container"> 
+<% @item_array.each do |entry|%>
+<ul>
+<% entry.each do |key, value| %>
+<li> <%= key%> : <%= value%> </li>
+<%end%>
+
+ </ul>
+ <aside> <iframe
+  width="600"
+  height="450"
+  style="border:0"
+  loading="lazy"
+  allowfullscreen
+  referrerpolicy="no-referrer-when-downgrade"
+  src= <%= URI("https://www.google.com/maps/embed/v1/place?key=#{@google_key}&q=#{entry["street_number"]}#{entry["street_direction"]}#{entry["street_name"]},Chicago,IL")%>>
+</iframe> </aside>
+ <%end%>
+ </div>

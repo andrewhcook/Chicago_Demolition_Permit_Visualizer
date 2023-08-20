@@ -1,4 +1,11 @@
 <h1> Visualize Chicago Demolition Permits </h1>
+<h2> This application exists to enable the research of Chicago demolition permits so the record information can be viewed and the address can be displayed on a google map.
+It queries the api found at <a href = "https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8" target = "_blank"> https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8 </a> in order to generate relevant map and record information. 
+ </h2>
+
+ <h3> Start by selecting the most recently filed permits you want to see, then select the oldest filed records to bound the search.  </h3>
+ <h3> Because this API does not provide date information for its entries, this is the only way to search for records in a roughly chronological fashion. <h3>
+ <h3> To track recent demolitions the user should use the application on a regular basis searching for the latest records </h3>
 <h3> Please remember larger query sizes can slow down response times significantly </h3>
 <form action="/map_view">
   <label for="records_from">
@@ -11,25 +18,6 @@
   </label>
   <input id="records_to" name="records_to" text="text">
 
-  <button>
-    Visualize!
-  </button>
-</form>
-
-<h2> Or Search By Distance From An Address </h2>
-<form action="/filtered_map_view">
-  
-
-  <label for="distance">
-    Distance in Kilometers
-  </label>
-  <input id="distance" name="distance" text="text">
-
-
-<label for="anchor_address">
-    From Address
-  </label>
-  <input id="anchor_address" name="anchor_address" text="text">
   <button>
     Visualize!
   </button>

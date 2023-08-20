@@ -1,0 +1,24 @@
+<%
+##I'm trying to get date information by cross referencing the permit number given by the demolition permit and looking it up in the general building permits query information.
+## I estimate this to be an O(n2) operation (every value of permitID could end up searching through the entire general building permits query assuming this collection is unordered) and thus infeasible for this application
+##it's really ashame that the demolition permit API entries come without date-of-filing information
+require "net/http"
+@google_key = ENV.fetch("G_MAPS_API_KEY")
+@records_from = Date.parse(params["records_from"])
+@records_to = Date.parse(params["records_to"])
+
+gen_permit_uri = URI("https://data.cityofchicago.org/resource/ydr8-5enu.json")
+response = Net::HTTP.get(gen_permit_uri)
+gen_response = JSON.parse(response)
+demo_uri =  URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
+demo_response = Net::HTTP.get(demo_uri)
+
+gen_results = JSON.parse(gen_response)
+demo_results = JSON.parse(demo_response)
+
+demo_results.each { |entry|
+permit_num = entry["permit_"]
+
+}
+
+%>

@@ -3,16 +3,17 @@ require "net/http"
 @google_key = ENV.fetch("G_MAPS_API_KEY")
 @distance = params["distance"].to_f * 1000.0
 @anchor_address = params["anchor_address"]
+@records_from = params["records_from"].to_i
+@records_to = params["records_to"].to_i
+
 uri = URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
 response = Net::HTTP.get(uri)
 results = JSON.parse(response)
-
 @geo_distance_uri = "https://maps.googleapis.com/maps/api/distancematrix/json"
-
 @newest = []
-results.each { |item|
-@newest.push(item)
-}
+for i in @records_from..@records_to do
+@newest.push(results[i])
+end
 @addresses = []
  @newest.each {|item| 
 
@@ -27,7 +28,6 @@ results.each { |item|
   :origins => CGI.escape(@anchor_address),
   :mode => CGI.escape("driving")
 }
-
 uri = URI("#{@geo_distance_uri}?#{parameters.map { |k,v| "#{k}=#{v}" }.join('&')}&key=#{@google_key}")
 response = Net::HTTP.get(uri)
 result = JSON.parse(response)
@@ -40,34 +40,24 @@ result['rows'].each do |row|
   end
 end
 }
-
 @lat_lon = []
-
 @addresses.each {|street_address| 
 uri = URI("https://maps.googleapis.com/maps/api/geocode/json?address=#{CGI.escape(street_address)}&key=#{@google_key}")
 response = Net::HTTP.get(uri)
 result = JSON.parse(response)
-
-# Access the first element in the array, then the "geometry" hash, then the "location" hash
 location = result.fetch("results").at(0).fetch("geometry").fetch("location")
-
 lat = location.fetch("lat")
 lon = location.fetch("lng")
 @lat_lon.push("#{lat},#{lon}")
 }
-
-
 base_url = "https://maps.googleapis.com/maps/api/staticmap"
-
 second_parameters = {
   :center => "Chicago",
-  :zoom => 10,
   :size => "600x600",
   :markers => "color:blue #{@lat_lon.map { |address| CGI.escape(address) }.join("|").gsub("|","%7C").gsub(" ","%20")}",
   :key => @google_key
 }
 @second_request_url = URI("#{base_url}?#{second_parameters.map { |k,v| "#{k}=#{v}" }.join('&')}")
-
 %>
 
 
@@ -76,4 +66,5 @@ second_parameters = {
   height="450"
   src="<%= @second_request_url %>"
 >
- <a href= "/"> Back to Homepage </a>
+
+<a href = <%= "/filtered_records_view/#{CGI.escape(@anchor_address)}/#{@distance}/#{@records_from}/#{@records_to}"%> > View Filtered Records </a>

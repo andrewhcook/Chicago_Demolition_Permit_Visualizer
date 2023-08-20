@@ -50,7 +50,6 @@ base_url = "https://maps.googleapis.com/maps/api/staticmap"
 
 second_parameters = {
   :center => "Chicago",
-  :zoom => 10,
   :size => "600x600",
   :markers => "color:blue #{@lat_lon.map { |address| CGI.escape(address) }.join("|").gsub("|","%7C").gsub(" ","%20")}",
   :key => @google_key
@@ -64,5 +63,25 @@ second_parameters = {
   height="450"
   src="<%= @second_request_url %>"
 >
+
+
+<h2> Narrow Search By Distance From An Address </h2>
+<form action= <%= "/filtered_map_view/#{@records_from}/#{@records_to}"%>>
+  
+
+  <label for="distance">
+    Distance in Kilometers
+  </label>
+  <input id="distance" name="distance" text="text">
+
+
+<label for="anchor_address">
+    From Address
+  </label>
+  <input id="anchor_address" name="anchor_address" text="text">
+  <button>
+    Visualize!
+  </button>
+</form>
 
 <a href = <%= "/records_view/#{@records_to}/#{@records_from}"%> > View Raw Records </a>
