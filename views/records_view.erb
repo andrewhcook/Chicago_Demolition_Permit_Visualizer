@@ -1,0 +1,29 @@
+<% 
+
+@records_from = params["records_from"].to_i
+@records_to = params["records_to"].to_i
+@city_key = ENV.fetch("CITY_DEMOLITION_API_TOKEN")
+
+require "net/http"
+uri = URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
+response = Net::HTTP.get(uri)
+results = JSON.parse(response)
+@newest = []
+for i in @records_from..@records_to do
+item = results[i]
+@newest.push(item)
+end
+%>
+<h2> View Chicago Demolition Permit Records </h2>
+<div class = "permit-container"> 
+<% @newest.each do |entry|%>
+<ul>
+<% entry.each do |key, value| %>
+<li> <%= key%> : <%= value%> </li>
+<%end%>
+
+ </ul>
+ <%end%>
+ </div>
+
+ <a href= "/"> Back to Homepage </a>
