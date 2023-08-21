@@ -1,18 +1,9 @@
-# sinatra-template
+This app is live at: https://chicago-demolition-permit-records-parser.onrender.com/
 
-Use this repository to create new Sinatra apps. 
+This app makes calls to the api found at https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8 and displays relevant records.
 
-Optionally, to use `ActiveRecord` for database operations, add to the `app.rb`:
+It then geolocates entries and filters results according to user specified information.
 
-```ruby
-require "sinatra/activerecord"
-```
+Use it to visualize and parse through recent demolition permit entries in Chicago, IL.
 
-And in the `config/environment.rb` file add this code block:
-
-```ruby
-configure do
-  # setup a database connection
-  set(:database, { adapter: "sqlite3", database: "db/development.sqlite3" })
-end
-```
+The data.cityofchicago.org demolition record api does not provide dated entries so it is not feasible to allow users to search by date of filing.
