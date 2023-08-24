@@ -1,24 +1,21 @@
 <h1> Visualize Chicago Demolition Permits </h1>
 <h2> This application exists to enable the research of Chicago demolition permits so the record information can be viewed and the address can be displayed on a google map.
-It queries the api found at <a href = "https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8" target = "_blank"> https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8 </a> in order to generate relevant map and record information. 
+It queries the api found at <a href = "https://data.cityofchicago.org/Buildings/Building-Permits/ydr8-5enu" target = "_blank"> https://data.cityofchicago.org/Buildings/demolition-permits/e4xk-pud8 </a> in order to generate relevant map and record information. 
  </h2>
 
- <h3> Start by selecting the most recently filed permits you want to see, then select the oldest filed records to bound the search.  </h3>
- <h3> Because this API does not provide date information for its entries, this is the only way to search for records in a roughly chronological fashion. <h3>
- <h3> To track recent demolitions the user should use the application on a regular basis searching for the latest records </h3>
-<h3> Please remember larger query sizes can slow down response times significantly </h3>
-<form action="/map_view">
+<h2> Search by Date </h2>
+<form action="/date_filtered_view">
   <label for="records_from">
     Records From
   </label>
-  <input id="records_from" name="records_from" text="text">
+  <input id="records_from" name="records_from" type = "date">
 
   <label for="records_to">
     Records To
   </label>
-  <input id="records_to" name="records_to" text="text">
+  <input id="records_to" name="records_to" type = "date">
 
   <button>
-    Visualize!
+    Search!
   </button>
 </form>

@@ -1,24 +1,59 @@
 <%
-##I'm trying to get date information by cross referencing the permit number given by the demolition permit and looking it up in the general building permits query information.
-## I estimate this to be an O(n2) operation (every value of permitID could end up searching through the entire general building permits query assuming this collection is unordered) and thus infeasible for this application
-##it's really ashame that the demolition permit API entries come without date-of-filing information
+## I switched the queried API to be the general buildings permits api. I then filter those results for more complete demolition records.
+
 require "net/http"
+require "date"
 @google_key = ENV.fetch("G_MAPS_API_KEY")
 @records_from = Date.parse(params["records_from"])
 @records_to = Date.parse(params["records_to"])
 
-gen_permit_uri = URI("https://data.cityofchicago.org/resource/ydr8-5enu.json")
-response = Net::HTTP.get(gen_permit_uri)
-gen_response = JSON.parse(response)
-demo_uri =  URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
-demo_response = Net::HTTP.get(demo_uri)
+gen_permit_url = URI("https://data.cityofchicago.org/resource/ydr8-5enu.json?permit_type=PERMIT - WRECKING/DEMOLITION&$limit=50000")
+gen_permit_response = Net::HTTP.get(gen_permit_url)
+gen_permit_result = JSON.parse(gen_permit_response)
+@relevant_records = []
+counter = 0
+filtered_gen_permits = gen_permit_result.select {|item|}
+gen_permit_result.each { |entry|
+unformatted_issue_date = entry.fetch("issue_date")
+issue_date = Date.parse(unformatted_issue_date)
 
-gen_results = JSON.parse(gen_response)
-demo_results = JSON.parse(demo_response)
-
-demo_results.each { |entry|
-permit_num = entry["permit_"]
-
+if issue_date > @records_from && issue_date < @records_to
+@relevant_records.push(entry)
+end
 }
-
 %>
+
+<h2> Found <%= "#{@relevant_records.length}" %> records </h2>
+<h2> Narrow Search By Distance From An Address (Works for queries under 250 records) </h2>
+<form action= <%= "/filtered_map_view/#{@records_from}/#{@records_to}"%>>
+  
+
+  <label for="distance">
+    Distance in Kilometers
+  </label>
+  <input id="distance" name="distance" text="text">
+
+
+<label for="anchor_address">
+    From Address
+  </label>
+  <input id="anchor_address" name="anchor_address" text="text">
+  <button>
+    Narrow Search!
+  </button>
+</form>
+
+<div class = "permit-container"> 
+<% @relevant_records.each do |entry|%>
+<% @address = "#{entry["street_number"]} #{entry["street_direction"]} #{entry["street_name"]}, #{entry["suffix"]}" %>
+<ul>
+<% entry.each do |key, value| %>
+<li> <%= key%> : <%= value%> </li>
+
+<%end%>
+
+ </ul>
+<a href = <%="/date_map_view/#{CGI.escape(@address)},Chicago,IL"%> target = "_blank" > View On Map! </a>
+ <%end%>
+ 
+ </div>

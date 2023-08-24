@@ -6,7 +6,7 @@ get("/") do
  erb(:homepage)
 end
 
-get("/map_view") do
+get("/map_view/:address") do
 erb(:map_view)
 end
 
@@ -20,4 +20,12 @@ end
 
 get("/filtered_records_view/:anchor_address/:distance/:records_from/:records_to")do
 erb(:filtered_records_view)
+end
+
+get("/date_filtered_view") do
+erb(:date_filtered_view)
+end
+
+get("/date_map_view/:address") do 
+  erb(:date_map_view)
 end
