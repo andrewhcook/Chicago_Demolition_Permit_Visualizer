@@ -1,0 +1,17 @@
+
+<%
+@google_key = ENV.fetch("G_MAPS_API_KEY")
+@street_address = params["address"]
+
+@request_url= URI("https://www.google.com/maps/embed/v1/place?key=#{@google_key}&q=#{@street_address}")
+%>
+<h4> <%= @street_address%> </h4>
+<aside> <iframe
+  width="600"
+  height="450"
+  style="border:0"
+  loading="lazy"
+  allowfullscreen
+  referrerpolicy="no-referrer-when-downgrade"
+  src= <%= @request_url%>>
+</iframe> </aside>

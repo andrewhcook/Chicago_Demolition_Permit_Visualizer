@@ -1,26 +1,38 @@
 <%
+#In future iterations of this application I may consider using the following equation instead of calls to the google geocoding api: 
+##(Haversine formula) :  d = 2R × sin⁻¹ (√ [sin² ((θ₂ - θ₁)/2) + cosθ₁ × cosθ₂ × sin² ((φ₂ - φ₁)/2)])
 require "net/http"
+require "date"
 @google_key = ENV.fetch("G_MAPS_API_KEY")
 @distance = params["distance"].to_f * 1000.0
 @anchor_address = params["anchor_address"]
-@records_from = params["records_from"].to_i
-@records_to = params["records_to"].to_i
+@records_from = Date.parse(params["records_from"])
+@records_to = Date.parse(params["records_to"])
 
-uri = URI("https://data.cityofchicago.org/resource/e4xk-pud8.json")
+uri = URI("https://data.cityofchicago.org/resource/ydr8-5enu.json?permit_type=PERMIT - WRECKING/DEMOLITION&$limit=50000")
 response = Net::HTTP.get(uri)
 results = JSON.parse(response)
 @geo_distance_uri = "https://maps.googleapis.com/maps/api/distancematrix/json"
-@newest = []
-for i in @records_from..@records_to do
-@newest.push(results[i])
+@filtered_entries = []
+@relevant_records = []
+
+results.each { |entry|
+unformatted_issue_date = entry.fetch("issue_date")
+issue_date = Date.parse(unformatted_issue_date)
+
+if issue_date > @records_from && issue_date < @records_to
+@filtered_entries.push(entry)
 end
-@addresses = []
- @newest.each {|item| 
+}
+
+
+ @filtered_entries.each {|item| 
 
         number = item["street_number"]
         direction = item["street_direction"]
         name = item["street_name"]
-        address_string = "#{number} #{direction} #{name}, Chicago, IL"
+        suffix = item["suffix"]
+        address_string = "#{number} #{direction} #{name} #{suffix}, Chicago, IL"
 
 
         parameters = {
@@ -35,36 +47,25 @@ result['rows'].each do |row|
   row['elements'].each do |element|
     distance_value = element['distance']['value'].to_f
     if distance_value < @distance
-    @addresses.push(address_string)
+    @relevant_records.push(item)
     end
   end
 end
 }
-@lat_lon = []
-@addresses.each {|street_address| 
-uri = URI("https://maps.googleapis.com/maps/api/geocode/json?address=#{CGI.escape(street_address)}&key=#{@google_key}")
-response = Net::HTTP.get(uri)
-result = JSON.parse(response)
-location = result.fetch("results").at(0).fetch("geometry").fetch("location")
-lat = location.fetch("lat")
-lon = location.fetch("lng")
-@lat_lon.push("#{lat},#{lon}")
-}
-base_url = "https://maps.googleapis.com/maps/api/staticmap"
-second_parameters = {
-  :center => "Chicago",
-  :size => "600x600",
-  :markers => "color:blue #{@lat_lon.map { |address| CGI.escape(address) }.join("|").gsub("|","%7C").gsub(" ","%20")}",
-  :key => @google_key
-}
-@second_request_url = URI("#{base_url}?#{second_parameters.map { |k,v| "#{k}=#{v}" }.join('&')}")
+
 %>
+<h4> Found <%= @relevant_records.length %> Records </h4>
+<div class = "permit-container"> 
+<% @relevant_records.each do |entry|%>
+<% @address = "#{entry["street_number"]} #{entry["street_direction"]} #{entry["street_name"]}, #{entry["suffix"]}" %>
+<ul>
+<% entry.each do |key, value| %>
+<li> <%= key%> : <%= value%> </li>
 
+<%end%>
 
-<img 
-  width="600"
-  height="450"
-  src="<%= @second_request_url %>"
->
-
-<a href = <%= "/filtered_records_view/#{CGI.escape(@anchor_address)}/#{@distance}/#{@records_from}/#{@records_to}"%> > View Filtered Records </a>
+ </ul>
+<a href = <%="/date_map_view/#{CGI.escape(@address)},Chicago,IL"%> target = "_blank"> View On Map! </a>
+ <%end%>
+ 
+ </div>
