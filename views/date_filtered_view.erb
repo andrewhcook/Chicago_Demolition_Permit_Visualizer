@@ -24,24 +24,6 @@ end
 %>
 
 <h2> Found <%= "#{@relevant_records.length}" %> records </h2>
-<h2> Narrow Search By Distance From An Address (Works for queries under 250 records) </h2>
-<form action= <%= "/filtered_map_view/#{@records_from}/#{@records_to}"%>>
-  
-
-  <label for="distance">
-    Distance in Kilometers
-  </label>
-  <input id="distance" name="distance" text="text">
-
-
-<label for="anchor_address">
-    From Address
-  </label>
-  <input id="anchor_address" name="anchor_address" text="text">
-  <button>
-    Narrow Search!
-  </button>
-</form>
 
 <div class = "permit-container"> 
 <% @relevant_records.each do |entry|%>
